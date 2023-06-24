@@ -66,12 +66,14 @@ export class Cloud101Stack extends Stack {
     distribution.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // Create a new CName Record for the (existing) hosted zone and add it to route53
-    new CnameRecord(this, 'Cloud101DistributionAlias', {
+    const record = new CnameRecord(this, 'Cloud101DistributionAlias', {
       recordName: `presentation.cloud101.nl`,
       domainName: distribution.domainName,
       zone: hostedZone,
       ttl: Duration.seconds(300),
     });
+
+    record.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // Output the CloudFront distribution URL
     new CfnOutput(this, 'Cloud101DistributionURL', {
