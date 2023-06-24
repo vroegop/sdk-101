@@ -6,6 +6,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
 
   <style about="theme-switch">
+      .slides > section:first-child {
+          background-image: url('img/background.svg') !important;
+          background-size: 150% !important;
+          background-position: center center !important;
+      }
+
       /* Switch to toggle dark and light themes */
       .theme-switch {
           position: absolute;
@@ -50,41 +56,6 @@
       }
   </style>
   <style about="luminis-theme">
-      body.light {
-          --r-background-color: #ccc;
-      }
-      body.dark {
-          --r-background-color: #333;
-      }
-
-      body:after {
-          content: '';
-          background-image: url('img/wallpaper-light.jpg');
-          position: absolute;
-          left: 0;
-          right: 0;
-          top: 0;
-          bottom: 0;
-          background-size: cover;
-          z-index: -1;
-          opacity: 0.1;
-      }
-
-      body:before {
-          content: '';
-          display: block;
-          --image-width: 60vw;
-          --image-height: calc(var(--image-width) / 7);
-          width: var(--image-width);
-          height: var(--image-height);
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          background-image: url('img/shape_logo.png');
-          z-index: 2;
-          background-size: cover;
-      }
-
       console {
           position: relative;
           display: block;
@@ -255,7 +226,7 @@
 
     // Bounds for smallest/largest possible scale to apply to content
     minScale: 0.2,
-    maxScale: 2.0,
+    maxScale: 1.0,
 
     progress: true,
     controls: false,
