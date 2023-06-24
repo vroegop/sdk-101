@@ -17,9 +17,8 @@ The plan:
 
 # Install AWS CLI & CDK
 
-[💾 AWS CLI](https://awscli.amazonaws.com/AWSCLIV2.pkg)
-
-[💾 NODE.JS](https://nodejs.org/dist/v18.16.0/node-v18.16.0.pkg)
+[🌍 AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+[🌍 NODE.JS](https://nodejs.org/en/download)
 
 <console>$ npm install --global aws-cdk</console>
 
