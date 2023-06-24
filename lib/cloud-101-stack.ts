@@ -37,12 +37,12 @@ export class Cloud101Stack extends Stack {
       accessControl: BucketAccessControl.PRIVATE,
       bucketName: 'cloud-101-presentation',
 
-      // delete objects on stack/bucket removal
+      // delete objects on stack/bucket removal (this creates a lambda)
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
-    // Deploy files to the S3 bucket
+    // Deploy files to the S3 bucket (this creates a lambda)
     new BucketDeployment(this, 'Cloud101PresentationDeployment', {
       destinationBucket: bucket,
       sources: [ Source.asset(path.resolve(__dirname, '../slides')) ]
