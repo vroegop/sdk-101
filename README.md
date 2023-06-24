@@ -31,11 +31,7 @@
 
 The branch `cloud-101` is the entrypoint for your journey if you are new to most (cdk or AWS) stuff.
 
-> Note that by entrypoint I mean this contains good examples and a useful slidedeck which you can follow.
-> The slidedeck will guide you through the cloud journey and tell you where to begin. The stack in this branch is to host the 
-> slidedeck using HTTPS via a CloudFront distribution and the stack is simple but a little too complicated for someone completely new.
-
-If you want to deploy the `cloud-101` branch to AWS using CDK you need to do a few things:
+If you want to deploy the `presentation` branch to AWS using CDK you need to do a few things:
 
 * Make sure you're logged in to the AWS CLI
 * Make sure you have a AWS account that can use CDK and create the following resources (least privilege or have admin access):
