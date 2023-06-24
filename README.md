@@ -12,11 +12,13 @@
 * `npm run test`       perform the jest unit tests
 
 * `aws configure sso`  configure SSO session and config
-* `aws sso login`      login to AWS using the SSO (you may need --profile)
+* `aws sso login`      login to AWS using the SSO (you may need `--profile {profileName}`)
 
 * `cdk deploy`         deploy this stack to your default AWS account/region
 * `cdk diff`           compare deployed stack with current state
 * `cdk synth`          emits the synthesized CloudFormation template
+
+* `npx live-server`    use this command in the `./slides` folder to see the presentation
 
 ## Good to know
 
