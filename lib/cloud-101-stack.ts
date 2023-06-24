@@ -73,6 +73,7 @@ export class Cloud101Stack extends Stack {
       ttl: Duration.seconds(300),
     });
 
+    // Remove CName record on stack removal
     record.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // Output the CloudFront distribution URL
