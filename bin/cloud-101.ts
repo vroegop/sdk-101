@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { Cloud101Stack } from '../lib/cloud-101-stack';
+import { CognitoApigatewayLambdaDynamodbStack } from '../lib/cognito-apigateway-lambda-dynamodb-stack';
 
 const app = new cdk.App();
-new Cloud101Stack(app, 'Cloud101Stack', {
+new CognitoApigatewayLambdaDynamodbStack(app, 'CognitoApigatewayLambdaDynamodbStack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
