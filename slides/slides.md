@@ -118,7 +118,7 @@ test('Test if bucket is created', () => {
 });
 ```
 
---
+---
 
 ## ⚖️ Full control and regulation
 
