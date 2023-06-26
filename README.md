@@ -1,5 +1,37 @@
 # Welcome to Cloud101
 
+## Good to know
+
+The branch `cloud-101` is the entrypoint for your journey if you are new to most (cdk or AWS) stuff.
+
+If you want to deploy this branch to AWS using CDK you need to do a few things:
+
+* Make sure you're logged in to the AWS CLI
+* Make sure you have a AWS account that can use CDK and create the following resources (least privilege or have admin access):
+  * Cognito
+  * API Gateway
+  * Lambda Function
+
+## Parameters
+
+**After deploying you need to update the `index.html` file with the output that is provided in the CDK console**
+
+The `index.html` file contains three parameters on top of the file:
+
+```html
+  <script>
+    const region = 'US-WEST-2';
+    const apiEndpoint = 'https://3qidpu1xzl.execute-api.us-west-2.amazonaws.com/prod/';
+    const userPoolClientId = '3ab3raemboe43nafr3m19j24gn';
+  </script>
+```
+
+The region is defined in `bin/cloud-101.ts` and can be changed but then needs to be changed in both places.
+
+The other parameters are CFN Output parameters and can be found in the terminal after executing cdk deploy.
+
+If you already closed that terminal they are available as outputs in Cloudformation for the CognitoApigatewayLambdaStack stack that was created.
+
 ## Useful tools
 
 [🌍 AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
@@ -25,29 +57,4 @@
 
 --
 
-* `npx live-server`    use this command in the `./slides` folder to see the presentation
-
-## Good to know
-
-The branch `cloud-101` is the entrypoint for your journey if you are new to most (cdk or AWS) stuff.
-
-> Note that by entrypoint I mean this contains good examples and a useful slidedeck which you can follow.
-> The slidedeck will guide you through the cloud journey and tell you where to begin. The stack in this branch is to host the 
-> slidedeck using HTTPS via a CloudFront distribution and the stack is simple but a little too complicated for someone completely new.
-
-If you want to deploy the `cloud-101` branch to AWS using CDK you need to do a few things:
-
-* Make sure you're logged in to the AWS CLI
-* Make sure you have a AWS account that can use CDK and create the following resources (least privilege or have admin access):
-  * CloudFront distributions
-  * S3 Buckets
-  * Lambda's
-  * Alter Route53 records
-  * Use ACM Certificates
-* You should create a Route53 hosted zone and replace the URL in the stack with the correct URL specified in your hosted zone
-* You should create a ACM certificate and point to the right ARN in the stack
-* You should update the account number in the bin/cdk-serverless-workshop.ts file to your (desired) account number
-
-> Note: You can deploy this without a custom URL and a default SSL certificate by simply removing the
-> HostedZone, Certificate and CNameRecord (and everything referencing those). You'll get a default
-> CloudFront URL which also works (with SSL) but is a little less pretty 😉
+* `npx live-server`    use this command in the `./` (root) folder to see the testpage for the stack

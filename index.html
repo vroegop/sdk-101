@@ -2,6 +2,13 @@
 <html>
 <head>
   <title>API Gateway Test Page</title>
+
+  <script>
+    const region = 'US-WEST-2';
+    const apiEndpoint = 'https://3qidpu1xzl.execute-api.us-west-2.amazonaws.com/prod/';
+    const userPoolClientId = '3ab3raemboe43nafr3m19j24gn';
+  </script>
+
   <script src="https://sdk.amazonaws.com/js/aws-sdk-2.824.0.min.js"></script>
   <link rel="stylesheet"
     href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/dark.min.css">
@@ -109,9 +116,6 @@
 
 <script>
   // Fill in your parameters below
-  const region = 'US-WEST-2';
-  const apiEndpoint = 'https://lv6bv5f421.execute-api.us-west-2.amazonaws.com/prod/';
-  const userPoolClientId = 'f8nr473i6tikocggr337sefeb';
   let idToken = '';
 
   // Configure AWS SDK with your credentials and region
