@@ -5,7 +5,7 @@ import { Code, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { UserPoolEmail } from 'aws-cdk-lib/aws-cognito';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 
-export class CognitoApigatewayLambdaDynamodbStack extends Stack {
+export class CognitoApigatewayLambdaStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
