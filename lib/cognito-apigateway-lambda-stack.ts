@@ -47,25 +47,18 @@ export class CognitoApigatewayLambdaStack extends Stack {
         // This is scary, dev only! You will delete your users on deletion.
         deletionProtection: false,
         removalPolicy:  RemovalPolicy.DESTROY,
-        passwordPolicy: {
-          minLength: 8,
-          requireLowercase: true,
-          requireDigits: false,
-          requireSymbols: false,
-          requireUppercase: true
-        },
         // Important setting!
         // Setting this to true will cause production issues unless you have ultra smart users or .toLowerCase() everywhere!
         // The problem here is account recovery will only work if you use the right uppercase for email/username too and that's hard to
         // remember. The default value is true but I submitted a PR to change this to false.
         signInCaseSensitive: false,
-        email: UserPoolEmail.withCognito('randy.vroegop@luminis.eu'),
+        email: UserPoolEmail.withCognito(),
       },
       cognitoUserPoolClientProps: {
         authFlows: {
           adminUserPassword: true,
-          custom: false,
           userPassword: true,
+          custom: false,
           userSrp: false
         },
       }

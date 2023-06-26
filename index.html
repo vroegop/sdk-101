@@ -88,34 +88,25 @@
 <body>
 <h1>API Gateway Test Page</h1>
 
-<div>
-  <h2>Email</h2>
-  <input type="email" id="email" placeholder="Email">
-</div>
+<h2>Email</h2>
+<input type="email" id="email" placeholder="Email">
 
-<div>
-  <h2>Register | Login</h2>
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="register()" id="register-button">Register</button>
-  <button onclick="login()" id="login-button">Login</button>
-</div>
+<h2>Register | Login</h2>
+<input type="password" id="password" placeholder="Password">
+<button onclick="register()" id="register-button">Register</button>
+<button onclick="login()" id="login-button">Login</button>
 
-<div>
-  <h2>Verify</h2>
-  <input type="number" id="verify-code" placeholder="######">
-  <button onclick="verify()" id="verify-button">Verify</button>
-</div>
+<h2>Verify</h2>
+<input type="number" id="verify-code" placeholder="######">
+<button onclick="verify()" id="verify-button">Verify</button>
 
-<div>
-  <h2>API Response</h2>
-  <button onclick="fetchAPI()" id="fetch-button">Fetch data</button>
-  <pre><code id="response" class="hljs">
-    {}
-  </code></pre>
-</div>
+<h2>API Response</h2>
+<button onclick="fetchAPI()" id="fetch-button">Fetch data</button>
+<pre><code id="response" class="hljs">{}</code></pre>
 
 <script>
-  // Fill in your parameters below
+  const responsePreContainer = document.getElementById('response');
+  // idToken is returned by the login method and used in the api call
   let idToken = '';
 
   // Configure AWS SDK with your credentials and region
@@ -142,19 +133,8 @@
     };
 
     cognito.signUp(params, function (err, data) {
-      if (err) {
-        console.log('Registration error:', err);
-
-        var button = document.getElementById("register-button");
-        button.classList.add("error");
-        button.classList.remove("success");
-      } else {
-        console.log('Registration successful:', data);
-
-        var button = document.getElementById("register-button");
-        button.classList.add("success");
-        button.classList.remove("error");
-      }
+      status('register-button', err ? 'error' : 'success');
+      responsePreContainer.innerHTML = JSON.stringify(data || err, null, 4);
     });
   }
 
@@ -171,19 +151,8 @@
     };
 
     cognito.confirmSignUp(params, function (err, data) {
-      if (err) {
-        console.log('Verification error:', err);
-
-        var button = document.getElementById("verify-button");
-        button.classList.add("error");
-        button.classList.remove("success");
-      } else {
-        console.log('Verification successful:', data);
-
-        var button = document.getElementById("verify-button");
-        button.classList.add("success");
-        button.classList.remove("error");
-      }
+      status('verify-button', err ? 'error' : 'success');
+      responsePreContainer.innerHTML = JSON.stringify(data || err, null, 4);
     });
   }
 
@@ -204,26 +173,17 @@
 
     cognito.initiateAuth(params, function (err, data) {
       if (err) {
-        console.log('Authentication error:', err);
-
-        var button = document.getElementById("login-button");
-        button.classList.add("error");
-        button.classList.remove("success");
+        status('login-button', 'error');
       } else {
-        console.log('Authentication successful:', data);
         idToken = data.AuthenticationResult.IdToken;
-
-        var button = document.getElementById("login-button");
-        button.classList.add("success");
-        button.classList.remove("error");
-        // Perform further actions after successful authentication
+        status('login-button', 'success');
       }
+      responsePreContainer.innerHTML = JSON.stringify(data || err, null, 4);
     });
   }
 
   // Fetch data from the API Gateway
   function fetchAPI() {
-    const responsePreContainer = document.getElementById('response');
     const headers = {
       'Authorization': `Bearer ${idToken}`
     };
@@ -235,20 +195,28 @@
       .then(response => response.json())
       .then(data => {
         responsePreContainer.innerHTML = JSON.stringify(data, null, 4);
-        hljs.highlightAll();
-
-        var button = document.getElementById("fetch-button");
-        button.classList.add("success");
-        button.classList.remove("error");
+        status('fetch-button', 'success');
       })
       .catch(error => {
         responsePreContainer.innerHTML = JSON.stringify(error, null, 4);
-        hljs.highlightAll();
-
-        var button = document.getElementById("fetch-button");
-        button.classList.add("error");
-        button.classList.remove("success");
+        status('fetch-button', 'error');
       });
+  }
+
+  /**
+   * @param id string buttonId to make red or green
+   * @param status error | success (others not supported by css)
+   */
+  function status(id, status) {
+    var button = document.getElementById(id);
+    if (status === 'error') {
+      button.classList.add('error');
+      button.classList.remove('success');
+    } else {
+      button.classList.add('success');
+      button.classList.remove('error');
+    }
+    hljs.highlightAll();
   }
 </script>
 </body>
