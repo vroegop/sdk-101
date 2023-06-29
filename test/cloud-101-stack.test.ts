@@ -1,15 +1,15 @@
 import { Template } from 'aws-cdk-lib/assertions';
-import { Cloud101Stack } from '../lib/cloud-101-stack';
+import { IntroductionStack } from '../lib/introduction-stack';
 import { App } from 'aws-cdk-lib';
 
 describe('Test the Cloud101Stack', () => {
   let app: App;
-  let stack: Cloud101Stack;
+  let stack: IntroductionStack;
   let template: Template;
 
   beforeEach(() => {
     app = new App();
-    stack = new Cloud101Stack(app, 'MyTestStack', { env: { region: 'us-west-2', account: '531843824238' } });
+    stack = new IntroductionStack(app, 'MyTestStack', { env: { region: 'us-west-2', account: '531843824238' } });
     template = Template.fromStack(stack);
   });
 

@@ -1,8 +1,8 @@
 {
-  "name": "cdk-serverless-workshop",
+  "name": "Cloud introduction",
   "version": "0.1.0",
   "bin": {
-    "cdk-serverless-workshop": "bin/cdk-serverless-workshop.js"
+    "cdk-serverless-workshop": "bin/introduction.js"
   },
   "scripts": {
     "build": "tsc",

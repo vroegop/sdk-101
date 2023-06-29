@@ -8,7 +8,7 @@ import { S3Origin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { CnameRecord, HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 
-export class Cloud101Stack extends Stack {
+export class IntroductionStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -33,9 +33,9 @@ export class Cloud101Stack extends Stack {
      */
 
       // Create an S3 bucket
-    const bucket = new Bucket(this, 'Cloud101PresentationBucket', {
+    const bucket = new Bucket(this, 'IntroductionPresentationBucket', {
       accessControl: BucketAccessControl.PRIVATE,
-      bucketName: 'cloud-101-presentation',
+      bucketName: 'introduction-presentation',
 
       // delete objects on stack/bucket removal (this creates a lambda)
       removalPolicy: RemovalPolicy.DESTROY,
@@ -43,19 +43,19 @@ export class Cloud101Stack extends Stack {
     });
 
     // Deploy files to the S3 bucket (this creates a lambda)
-    new BucketDeployment(this, 'Cloud101PresentationDeployment', {
+    new BucketDeployment(this, 'IntroductionPresentationDeployment', {
       destinationBucket: bucket,
       sources: [ Source.asset(path.resolve(__dirname, '../slides')) ]
     });
 
     // Create an origin access identity for CloudFront
-    const originAccessIdentity = new OriginAccessIdentity(this, 'Cloud101OriginAccessIdentity');
+    const originAccessIdentity = new OriginAccessIdentity(this, 'IntroductionOriginAccessIdentity');
     bucket.grantRead(originAccessIdentity);
 
     // Create a CloudFront distribution
-    const distribution = new Distribution(this, 'Cloud101Distribution', {
+    const distribution = new Distribution(this, 'IntroductionDistribution', {
       defaultRootObject: 'index.html',
-      domainNames: ['presentation.cloud101.nl'],
+      domainNames: ['introduction.cloud101.nl'],
       defaultBehavior: {
         origin: new S3Origin(bucket, { originAccessIdentity }),
       },
@@ -66,8 +66,8 @@ export class Cloud101Stack extends Stack {
     distribution.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // Create a new CName Record for the (existing) hosted zone and add it to route53
-    const record = new CnameRecord(this, 'Cloud101DistributionAlias', {
-      recordName: `presentation.cloud101.nl`,
+    const record = new CnameRecord(this, 'IntroductionDistributionAlias', {
+      recordName: `introduction.cloud101.nl`,
       domainName: distribution.domainName,
       zone: hostedZone,
       ttl: Duration.seconds(300),
@@ -77,7 +77,7 @@ export class Cloud101Stack extends Stack {
     record.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
     // Output the CloudFront distribution URL
-    new CfnOutput(this, 'Cloud101DistributionURL', {
+    new CfnOutput(this, 'IntroductionDistributionURL', {
       value: `https://${distribution.distributionDomainName}`
     });
   }
