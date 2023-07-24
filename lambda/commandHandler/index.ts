@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
-const tableName = process.env.TABLE_NAME;
+const tableName = process.env.EVENT_SOURCE_TABLE_NAME;
 const client = new DynamoDBClient({});
 const dynamo = DynamoDBDocumentClient.from(client);
 
@@ -21,14 +21,14 @@ export const handler = async (requestBody: any) => {
 
     return {
       statusCode: 200,
-      body: `Successfully executed ${dartsEvent.eventType}`,
+      body: `{ "result": "Successfully executed ${dartsEvent.eventType}"}`,
       headers
-    }
+    };
   } catch (err) {
     return {
       statusCode: 400,
       body: JSON.stringify(err),
       headers
-    }
+    };
   }
 };

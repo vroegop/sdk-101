@@ -1,24 +1,32 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
-const { unmarshall } = require("@aws-sdk/util-dynamodb");
+import { SendMessageCommandInput } from '@aws-sdk/client-sqs/dist-types/commands/SendMessageCommand';
 
-const tableName = process.env.PROJECTION_TABLE_NAME;
-const client = new DynamoDBClient({});
-const dynamo = DynamoDBDocumentClient.from(client);
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
-export const handler = async (event: any) => {
-  event.Records.forEach((record: any) => {
+const queueUrl = process.env.SQS_QUEUE_URL;
+const sqsClient = new SQSClient({});
 
-    const event = unmarshall(record.dynamodb.NewImage);
+export const handler = async (streamData: any) => {
+  const sqsMessages = streamData.Records.map((record: any) => {
+    const eventId = record.eventID;
+    const data = unmarshall(record.dynamodb.NewImage);
+    const messageGroupId = data.gameId;
 
-    console.log('Event Id: %s', record.eventID);
-    console.log('DynamoDB Record: %j', event);
+    const messageInput: SendMessageCommandInput = {
+      QueueUrl: queueUrl,
+      MessageAttributes: data,
+      MessageBody: `Updates for the dartgame ${eventId}: ${data.eventType}`,
+      MessageGroupId: messageGroupId,
+      MessageDeduplicationId: eventId,
+    };
 
-    dynamo.send(
-      new PutCommand({
-        TableName: tableName,
-        Item: JSON.parse(JSON.stringify(record.dynamodb)),
-      })
-    );
+    return messageInput;
   });
+
+  return sqsMessages.map(async (message: SendMessageCommandInput) => {
+    console.log('Sending message: ', message);
+    return sqsClient.send(new SendMessageCommand(message))
+      .then(response => console.log('Successfully send message: ', response))
+      .catch(err => console.log('An error occured: ', err));
+  })
 };

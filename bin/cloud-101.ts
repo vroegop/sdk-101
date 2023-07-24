@@ -1,21 +1,48 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { CognitoApigatewayLambdaStack } from '../lib/cognito-apigateway-lambda-stack';
+import { DartsBackendCommandStack } from '../lib/darts-backend-command-stack';
+import { DartsCloudfrontCertificateStack } from '../lib/darts-cloudfront-certificate-stack';
+import { DartsFrontendStack } from '../lib/darts-frontend-stack';
+import { DartsAuthenticationStack } from '../lib/darts-authentication-stack';
+import { DartsAPICertificateStack } from '../lib/darts-api-certificate-stack';
+import { DartsEventProjectionStack } from '../lib/darts-event-projection-stack';
+import { DartsDynamodbToSqsStack } from '../lib/darts-dynamodb-to-sqs-stack';
 
 const app = new cdk.App();
-new CognitoApigatewayLambdaStack(app, 'CognitoApigatewayLambdaStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const cloudfrontCertificateStack = new DartsCloudfrontCertificateStack(app, 'dartsCloudfrontCertificateStack', {
+  env: { region: 'us-east-1', account: '531843824238' },
+});
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
+const apiCertificateStack = new DartsAPICertificateStack(app, 'dartsAPICertificateStack', {
   env: { region: 'us-west-2', account: '531843824238' },
+});
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+const authenticationStack = new DartsAuthenticationStack(app, 'dartsAuthenticationStack', {
+  env: { region: 'us-west-2', account: '531843824238' },
+});
+
+const commandStack = new DartsBackendCommandStack(app, 'dartsBackendStack', {
+  env: { region: 'us-west-2', account: '531843824238' },
+  cognitoUserPool: authenticationStack.cognitoUserPool,
+  cognitoUserPoolClient: authenticationStack.cognitoUserPoolClient,
+  apiCertificate: apiCertificateStack.apiCertificate,
+});
+
+const dynamodbToSqsStack = new DartsDynamodbToSqsStack(app, 'DartsDynamodbToSqsStack', {
+  env: { region: 'us-west-2', account: '531843824238' },
+  dartsEventTable: commandStack.dartsEventTable
+});
+
+const eventProjectionStack = new DartsEventProjectionStack(app, 'dartsEventProjectionStack', {
+  env: { region: 'us-west-2', account: '531843824238' },
+  dartsEventQueue: dynamodbToSqsStack.dartsEventSqsQueue
+});
+
+const frontendStack = new DartsFrontendStack(app, 'dartsFrontendStack', {
+  env: { region: 'us-west-2', account: '531843824238' },
+  cloudfrontCertificate: cloudfrontCertificateStack.cloudfrontCertificate,
+  crossRegionReferences: true,
+  commandApi: commandStack.api
 });

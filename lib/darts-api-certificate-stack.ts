@@ -3,8 +3,8 @@ import { Construct } from 'constructs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 
-export class DartsCloudfrontCertificateStack extends Stack {
-  public cloudfrontCertificate: Certificate;
+export class DartsAPICertificateStack extends Stack {
+  public apiCertificate: Certificate;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -13,9 +13,9 @@ export class DartsCloudfrontCertificateStack extends Stack {
       domainName: 'cloud101.nl'
     });
 
-    this.cloudfrontCertificate = new Certificate(this, 'dartsFrontendCertificate', {
+    this.apiCertificate = new Certificate(this, 'dartsAPICertificate', {
       domainName: 'darts.cloud101.nl',
-      certificateName: 'dartsFrontendCertificate',
+      certificateName: 'dartsAPICertificate',
       validation: CertificateValidation.fromDns(hostedZone),
     });
   }

@@ -35,7 +35,7 @@ end box
 
 box Queue Stack
     participant "$LambdaIMG()\nDynamoDB to SQS\nEvent Emitter" as emitterLambda << Lambda >>
-    participant "$SimpleQueueServiceIMG()\n\nSQS FIFO Queue" as sqs << SQS FIFO Queue >>
+    participant "$SimpleQueueServiceIMG()\n\nSQS FIFO Queue" as sqs << SQS Queue >>
 end box
 
 box Projection Stack
@@ -44,7 +44,7 @@ box Projection Stack
 end box
 
 box Query Stack
-    participant "$APIGatewayIMG()\n\nGraphQL API" as graphqlApi << API Gateway >>
+    participant "$AppSyncIMG()\n\nGraphQL API" as graphqlApi << App Sync >>
 end box
 
 user -> cloudfront : Access Website
