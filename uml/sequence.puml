@@ -1,0 +1,71 @@
+@startuml
+' Uncomment the line below for "dark mode" styling
+!$AWS_DARK = false
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v16.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/SecurityIdentityCompliance/Cognito.puml
+!include AWSPuml/ApplicationIntegration/APIGateway.puml
+!include AWSPuml/Compute/Lambda.puml
+!include AWSPuml/Database/DynamoDB.puml
+!include AWSPuml/ApplicationIntegration/SimpleQueueService.puml
+!include AWSPuml/ApplicationIntegration/AppSync.puml
+!include AWSPuml/Storage/SimpleStorageService.puml
+!include AWSPuml/General/User.puml
+!include AWSPuml/NetworkingContentDelivery/CloudFront.puml
+
+'Hide the bottom boxes / Use filled triangle arrowheads
+skinparam style strictuml
+
+skinparam MaxMessageSize 300
+
+participant "$UserIMG()\nUser" as user
+
+box Front-end Stack
+    participant "$CloudFrontIMG()\n\nDistribution" as cloudfront << CloudFront Distribution >>
+    participant "$SimpleStorageServiceIMG()\n\nWebsite" as website << S3 Bucket >>
+end box
+
+box Command Stack
+    participant "$APIGatewayIMG()\n\nREST API" as api << API Gateway >>
+    participant "$CognitoIMG()\nAuthentication &\nRegistration" as cognito << Cognito User Pool >>
+    participant "$LambdaIMG()\nCommand validation &\nEvent creation" as lambda << Lambda >>
+    participant "$DynamoDBIMG()\n\nEvents table" as dynamo << DynamoDB >>
+end box
+
+box Queue Stack
+    participant "$LambdaIMG()\nDynamoDB to SQS\nEvent Emitter" as emitterLambda << Lambda >>
+    participant "$SimpleQueueServiceIMG()\n\nSQS FIFO Queue" as sqs << SQS FIFO Queue >>
+end box
+
+box Projection Stack
+    participant "$LambdaIMG()\n\nEvent Projection" as eventProjectionLambda << Lambda >>
+    participant "$DynamoDBIMG()\n\nProjection table" as projectionModel << DynamoDB >>
+end box
+
+box Query Stack
+    participant "$APIGatewayIMG()\n\nGraphQL API" as graphqlApi << API Gateway >>
+end box
+
+user -> cloudfront : Access Website
+cloudfront -> website : Serve content
+
+cloudfront -> api : Route to /api
+api -> cognito : Authenticate User
+
+cognito --> api : Authorization Successful
+api -> lambda : Call Lambda Function
+lambda -> dynamo : Store Commands as Events
+
+dynamo -> emitterLambda : DynamoDB Events
+emitterLambda -> sqs : Emit Events to SQS
+
+sqs -> eventProjectionLambda : Trigger Event Projection
+eventProjectionLambda -> projectionModel : Get Projection
+projectionModel --> eventProjectionLambda : Projection
+eventProjectionLambda -> projectionModel : Update Projection
+
+graphqlApi -> projectionModel : Get Projection
+projectionModel --> graphqlApi : Projection
+cloudfront -> graphqlApi : Query via GraphQL
+@enduml
