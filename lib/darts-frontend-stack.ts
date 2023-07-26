@@ -28,6 +28,7 @@ export class DartsFrontendStack extends Stack {
 
     // Create a bucket in which we can place our website
     const bucket = new Bucket(this, 'Bucket', {
+      bucketName: 'darts.cloud101.nl',
       accessControl: BucketAccessControl.PRIVATE,
       removalPolicy: RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
@@ -37,6 +38,7 @@ export class DartsFrontendStack extends Stack {
     new BucketDeployment(this, 'BucketDeployment', {
       destinationBucket: bucket,
       sources: [ Source.asset(path.resolve(__dirname, '../website')) ],
+      retainOnDelete: false
     });
 
     // Grant access to the bucket for the distribution

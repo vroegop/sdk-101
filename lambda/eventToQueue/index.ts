@@ -6,24 +6,29 @@ import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 const queueUrl = process.env.SQS_QUEUE_URL;
 const sqsClient = new SQSClient({});
 
-export const handler = async (streamData: any) => {
+export const handler = (streamData: any) => {
   const sqsMessages = streamData.Records.map((record: any) => {
-    const eventId = record.eventID;
     const data = unmarshall(record.dynamodb.NewImage);
+    const eventId = record.eventID;
     const messageGroupId = data.gameId;
 
     const messageInput: SendMessageCommandInput = {
       QueueUrl: queueUrl,
-      MessageAttributes: data,
-      MessageBody: `Updates for the dartgame ${eventId}: ${data.eventType}`,
+      MessageBody: `${JSON.stringify(data)}`,
       MessageGroupId: messageGroupId,
       MessageDeduplicationId: eventId,
+      MessageAttributes: {
+        eventType: {
+          DataType: 'String',
+          StringValue: data.event.eventType
+        }
+      }
     };
 
     return messageInput;
   });
 
-  return sqsMessages.map(async (message: SendMessageCommandInput) => {
+  return sqsMessages.map((message: SendMessageCommandInput) => {
     console.log('Sending message: ', message);
     return sqsClient.send(new SendMessageCommand(message))
       .then(response => console.log('Successfully send message: ', response))

@@ -2,7 +2,7 @@ import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { UserPool, UserPoolClient, UserPoolEmail } from 'aws-cdk-lib/aws-cognito';
 
-export class DartsAuthenticationStack extends Stack {
+export class DartsCognitoStack extends Stack {
   public cognitoUserPool: UserPool;
   public cognitoUserPoolClient: UserPoolClient;
 

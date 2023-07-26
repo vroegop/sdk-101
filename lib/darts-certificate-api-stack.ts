@@ -3,7 +3,7 @@ import { Construct } from 'constructs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 
-export class DartsAPICertificateStack extends Stack {
+export class DartsCertificateApiStack extends Stack {
   public apiCertificate: Certificate;
 
   constructor(scope: Construct, id: string, props?: StackProps) {

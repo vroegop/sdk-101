@@ -26,6 +26,9 @@
   },
   "exclude": [
     "node_modules",
-    "slides/img/cdk.out"
+    "slides",
+    "cdk.out",
+    "uml",
+    ".idea"
   ]
 }

@@ -33,12 +33,9 @@ box Command Stack
     participant "$DynamoDBIMG()\n\nEvents table" as dynamo << DynamoDB >>
 end box
 
-box Queue Stack
+box Event Projection Stack
     participant "$LambdaIMG()\nDynamoDB to SQS\nEvent Emitter" as emitterLambda << Lambda >>
     participant "$SimpleQueueServiceIMG()\n\nSQS FIFO Queue" as sqs << SQS Queue >>
-end box
-
-box Projection Stack
     participant "$LambdaIMG()\n\nEvent Projection" as eventProjectionLambda << Lambda >>
     participant "$DynamoDBIMG()\n\nProjection table" as projectionModel << DynamoDB >>
 end box

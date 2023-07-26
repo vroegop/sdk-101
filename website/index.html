@@ -48,16 +48,24 @@
       <option value="start-301">301</option>
     </select>
   </div>
+
+  <div class="row g-2 mb-3">
+    <div class="col">
+      <label class="form-label" for="player1">Player 1</label>
+      <input class="form-control" id="player1" value="player1" type="text">
+    </div>
+    <div class="col">
+      <label class="form-label" for="player1">Player 2</label>
+      <input class="form-control" id="player2" value="player2" type="text">
+    </div>
+  </div>
+
   <button class="btn btn-primary" id="start-game" onclick="startGame()">Start Game</button>
 
   <div style="display: none">
     <div class="mb-3">
       <label class="form-label" for="gameId">Game ID:</label>
       <input class="form-control" disabled id="gameId" name="gameId" placeholder="Game ID" type="text">
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="turnNumber">Throw Number:</label>
-      <input class="form-control" disabled id="turnNumber" name="turnNumber" placeholder="Throw Number" type="text">
     </div>
   </div>
 
@@ -77,8 +85,10 @@
   </div>
 
   <div class="mb-3">
-    <button class="btn btn-primary" id="submit-button" onclick="throwDarts()">Submit score</button>
-    <button class="btn btn-secondary" id="undo-button" onclick="throwDarts()">Undo last score</button>
+    <button class="btn btn-primary" onclick="throwDarts('player1')">Submit score P1</button>
+    <button class="btn btn-secondary" onclick="throwDarts('player1')">Undo last score P1</button>
+    <button class="btn btn-primary" onclick="throwDarts('player2')">Submit score P2</button>
+    <button class="btn btn-secondary" onclick="throwDarts('player2')">Undo last score P2</button>
   </div>
 
   <h2>Request</h2>
@@ -91,9 +101,9 @@
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.824.0.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
 <script>
-  AWS.config.update({ region: 'US-WEST-2' });
+  AWS.config.update({ region: 'EU-WEST-1' });
   const apiEndpoint = 'https://darts.cloud101.nl/api/';
-  const userPoolClientId = '5v8bufa5232he56un0990sd3nc';
+  const userPoolClientId = 'noo4m9g37q92796al8oitamf0';
 
   const requestPreContainer = document.getElementById('request');
   const responsePreContainer = document.getElementById('response');
@@ -149,33 +159,41 @@
 
   function startGame() {
     const gameId = `game-${new Date().getTime()}`;
+    const player1 = document.getElementById('player1').value;
+    const player2 = document.getElementById('player2').value;
+    const gameType = document.getElementById('gameType').value;
+
     document.getElementById('gameId').value = gameId;
-    document.getElementById('turnNumber').value = 1;
 
     const command = {
       gameId: gameId,
-      playerId: email(),
-      eventType: 'start-game',
       timestamp: new Date().toISOString(),
+      hostId: email(),
+      event: {
+        eventType: 'start-game',
+        players: { player1, player2 },
+        gameType
+      }
     };
     submitCommand(command);
   }
 
-  function throwDarts() {
+  function throwDarts(player) {
     const command = {
       gameId: document.getElementById('gameId').value,
-      playerId: email(),
-      eventType: 'throw-darts',
       timestamp: new Date().toISOString(),
-      score: {
-        turnNumber: document.getElementById('turnNumber').value,
-        dart1: document.getElementById('dart1').value,
-        dart2: document.getElementById('dart2').value,
-        dart3: document.getElementById('dart3').value,
+      hostId: email(),
+      event: {
+        eventType: 'throw-darts',
+        player,
+        score: {
+          dart1: document.getElementById('dart1').value,
+          dart2: document.getElementById('dart2').value,
+          dart3: document.getElementById('dart3').value,
+        }
       }
     };
     submitCommand(command);
-    increaseTurnNumber();
   }
 
   function submitCommand(command) {
@@ -202,12 +220,6 @@
       button.classList.remove('btn-danger');
     }
     hljs.highlightAll();
-  }
-
-  function increaseTurnNumber() {
-    var turnNumberInput = document.getElementById('turnNumber');
-    var currentValue = parseInt(turnNumberInput.value || 0);
-    turnNumberInput.value = currentValue + 1;
   }
 </script>
 </body>

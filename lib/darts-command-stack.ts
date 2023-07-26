@@ -6,7 +6,6 @@ import { CognitoUserPoolsAuthorizer, Cors, LambdaRestApi } from 'aws-cdk-lib/aws
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { AttributeType, BillingMode, StreamViewType, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 interface IDartsBackendStackProps extends StackProps {
   cognitoUserPool: UserPool;
@@ -14,7 +13,7 @@ interface IDartsBackendStackProps extends StackProps {
   apiCertificate: Certificate;
 }
 
-export class DartsBackendCommandStack extends Stack {
+export class DartsCommandStack extends Stack {
 
   public api: LambdaRestApi;
   public dartsEventTable: Table;
@@ -56,7 +55,8 @@ export class DartsBackendCommandStack extends Stack {
 
     // This is the commandHandlerLambda we are trying to protect. It receives the API call from the API Gateway if authentication succeeds.
     const commandHandlerLambda = new Function(this, 'dartsBackendCommandsLambda', {
-      functionName: 'commandLambda',
+      functionName: 'darts-commandLambda',
+      description: 'Receives commands from the API Gateway. Validation applies and the event will be stored in the DynamoDB table.',
       // Deploys the local folder to the commandHandlerLambda function
       code: Code.fromAsset(`lambda/commandHandler`),
       runtime: Runtime.NODEJS_18_X,
@@ -64,8 +64,7 @@ export class DartsBackendCommandStack extends Stack {
       handler: 'index.handler',
       environment: {
         EVENT_SOURCE_TABLE_NAME: this.dartsEventTable.tableName,
-      },
-      logRetention: RetentionDays.ONE_DAY
+      }
     });
 
     // Policy for the commandHandlerLambda to access DynamoDB

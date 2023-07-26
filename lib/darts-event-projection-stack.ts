@@ -1,30 +1,47 @@
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Code, Function, Runtime, StartingPosition } from 'aws-cdk-lib/aws-lambda';
+import { DynamoEventSource, SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { AssetHashType, Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
-import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
+import { Construct } from 'constructs';
 
-interface IDartsEventProjectionStackProps extends StackProps {
-  dartsEventQueue: Queue;
+interface IDartsEventStreamProps extends StackProps {
+  dartsEventTable: Table;
 }
 
 export class DartsEventProjectionStack extends Stack {
 
-  public dartsProjectionTable: Table;
-
-  constructor(scope: Construct, id: string, props: IDartsEventProjectionStackProps) {
+  constructor(scope: Construct, id: string, props: IDartsEventStreamProps) {
     super(scope, id, props);
 
+    const dartsEventSqsQueue = new Queue(this, 'dartsEventQueue', {
+      queueName: 'dartsEventQueue.fifo',
+      visibilityTimeout: Duration.seconds(30), // Adjust as needed
+      fifo: true, // Enable FIFO queue to use message groups
+      removalPolicy: RemovalPolicy.DESTROY
+    });
+
+    // Create a Lambda function to handle the DynamoDB stream events
+    const dartsDynamodbEventToSqsLambda = new Function(this, 'dartsDynamodbEventToSqsLambda', {
+      functionName: 'darts-dynamodbEventToSqsLambda',
+      description: 'Triggered by DynamoDB DartsEventTable stream events and pushes them to SQS for FiFO handling.',
+      code: Code.fromAsset(`lambda/eventToQueue`, { assetHash: AssetHashType.SOURCE }),
+      runtime: Runtime.NODEJS_18_X,
+      handler: 'index.handler',
+      environment: {
+        SQS_QUEUE_URL: dartsEventSqsQueue.queueUrl,
+      },
+    });
+
     // Create a DynamoDB table
-    this.dartsProjectionTable = new Table(this, 'DartsProjectionTable', {
-      tableName: 'DartsProjectionTable',
+    const dartsProjectionTable = new Table(this, 'DartsGameProjectionTable', {
+      tableName: 'DartsGameProjectionTable',
       partitionKey: {
         name: 'gameId',
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: 'timestamp',
+        name: 'hostId',
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -33,18 +50,23 @@ export class DartsEventProjectionStack extends Stack {
     });
 
     const eventProjectionLambda = new Function(this, 'eventProjectionLambda', {
-      functionName: 'eventProjectionLambda',
+      functionName: 'darts-eventProjectionLambda',
+      description: 'Lambda to project events into the DartsProjectionTable. It is triggered by SQS messages.',
       runtime: Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: Code.fromAsset('lambda/eventProjector'),
       environment: {
-        EVENT_SOURCE_TABLE_NAME: this.dartsProjectionTable.tableName,
+        PROJECTION_TABLE_NAME: dartsProjectionTable.tableName,
       }
     });
 
-    this.dartsProjectionTable.grantReadWriteData(eventProjectionLambda);
-    props.dartsEventQueue.grantSendMessages(eventProjectionLambda);
+    dartsDynamodbEventToSqsLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
+    eventProjectionLambda.applyRemovalPolicy(RemovalPolicy.DESTROY);
 
-    eventProjectionLambda.addEventSource(new SqsEventSource(props.dartsEventQueue));
+    dartsProjectionTable.grantReadWriteData(eventProjectionLambda);
+    dartsEventSqsQueue.grantSendMessages(dartsDynamodbEventToSqsLambda);
+
+    dartsDynamodbEventToSqsLambda.addEventSource(new DynamoEventSource(props.dartsEventTable, { startingPosition: StartingPosition.TRIM_HORIZON }));
+    eventProjectionLambda.addEventSource(new SqsEventSource(dartsEventSqsQueue));
   }
 }
