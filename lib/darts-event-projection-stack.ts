@@ -16,15 +16,22 @@ export class DartsEventProjectionStack extends Stack {
 
     const dartsEventSqsQueue = new Queue(this, 'dartsEventQueue', {
       queueName: 'dartsEventQueue.fifo',
-      visibilityTimeout: Duration.seconds(30), // Adjust as needed
+      visibilityTimeout: Duration.seconds(30),
       fifo: true, // Enable FIFO queue to use message groups
-      removalPolicy: RemovalPolicy.DESTROY
+      removalPolicy: RemovalPolicy.DESTROY,
+      deadLetterQueue: {
+        queue: new Queue(this, 'dartsEventQueue.deadLetterQueue', {
+          queueName: 'dartsEventQueue-deadLetterQueue.fifo',
+          fifo: true, // Enable FIFO queue to use message groups
+          removalPolicy: RemovalPolicy.DESTROY,
+        }), maxReceiveCount: 10
+      }
     });
 
     // Create a Lambda function to handle the DynamoDB stream events
     const dartsDynamodbEventToSqsLambda = new Function(this, 'dartsDynamodbEventToSqsLambda', {
       functionName: 'darts-dynamodbEventToSqsLambda',
-      description: 'Triggered by DynamoDB DartsEventTable stream events and pushes them to SQS for FiFO handling.',
+      description: `Triggered by DynamoDB DartsEventTable stream events and pushes them to SQS for FiFO handling. Deployed at ${new Date().toISOString()}`,
       code: Code.fromAsset(`lambda/eventToQueue`, { assetHash: AssetHashType.SOURCE }),
       runtime: Runtime.NODEJS_18_X,
       handler: 'index.handler',
@@ -51,7 +58,7 @@ export class DartsEventProjectionStack extends Stack {
 
     const eventProjectionLambda = new Function(this, 'eventProjectionLambda', {
       functionName: 'darts-eventProjectionLambda',
-      description: 'Lambda to project events into the DartsProjectionTable. It is triggered by SQS messages.',
+      description: `Lambda to project events into the DartsProjectionTable. It is triggered by SQS messages. Deployed at ${new Date().toISOString()}`,
       runtime: Runtime.NODEJS_18_X,
       handler: 'index.handler',
       code: Code.fromAsset('lambda/eventProjector'),

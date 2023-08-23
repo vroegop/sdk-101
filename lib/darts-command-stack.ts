@@ -56,7 +56,7 @@ export class DartsCommandStack extends Stack {
     // This is the commandHandlerLambda we are trying to protect. It receives the API call from the API Gateway if authentication succeeds.
     const commandHandlerLambda = new Function(this, 'dartsBackendCommandsLambda', {
       functionName: 'darts-commandLambda',
-      description: 'Receives commands from the API Gateway. Validation applies and the event will be stored in the DynamoDB table.',
+      description: `Receives commands from the API Gateway and stores in DynamodB. Deployed at ${new Date().toISOString()}`,
       // Deploys the local folder to the commandHandlerLambda function
       code: Code.fromAsset(`lambda/commandHandler`),
       runtime: Runtime.NODEJS_18_X,
